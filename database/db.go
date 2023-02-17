@@ -15,3 +15,12 @@ func Connect(conn string) (*sql.DB, error) {
 	err = db.Ping()
 	return db, err
 }
+
+func InsertUser(db *sql.DB, username string, password string) error {
+	_, err := db.Exec(`INSERT INTO user(username, password) VALUES(?, ?)`, username, password)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

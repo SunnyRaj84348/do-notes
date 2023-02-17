@@ -63,11 +63,9 @@ func main() {
 
 		err = database.InsertUser(db, cred.Username, string(hashPass))
 		if err != nil {
-			ctx.JSON(http.StatusConflict, gin.H{
+			ctx.AbortWithStatusJSON(http.StatusConflict, gin.H{
 				"message": "user already exist",
 			})
-
-			return
 		}
 	})
 

@@ -15,6 +15,12 @@ type Credential struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type User struct {
+	UserID   int
+	Username string
+	Password string
+}
+
 func main() {
 	router := gin.Default()
 
@@ -43,6 +49,28 @@ func main() {
 			})
 
 			return
+		}
+	})
+
+	router.POST("/login", func(ctx *gin.Context) {
+		cred := Credential{}
+
+		err := ctx.BindJSON(&cred)
+		if err != nil {
+			return
+		}
+
+		user := User{}
+		row := database.GetUser(db, cred.Username)
+
+		err = row.Scan(&user.UserID, &user.Username, &user.Password)
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+		}
+
+		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(cred.Password))
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
 		}
 	})
 

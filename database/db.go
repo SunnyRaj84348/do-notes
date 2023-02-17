@@ -24,3 +24,8 @@ func InsertUser(db *sql.DB, username string, password string) error {
 
 	return nil
 }
+
+func GetUser(db *sql.DB, username string) *sql.Row {
+	row := db.QueryRow(`SELECT * FROM user WHERE username = ?`, username)
+	return row
+}

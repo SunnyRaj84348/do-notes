@@ -18,11 +18,7 @@ func Connect(conn string) (*sql.DB, error) {
 
 func InsertUser(db *sql.DB, username string, password string) error {
 	_, err := db.Exec(`INSERT INTO user(username, password) VALUES(?, ?)`, username, password)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func GetUser(db *sql.DB, username string) *sql.Row {

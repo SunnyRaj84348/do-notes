@@ -2,9 +2,11 @@ package main
 
 import (
 	"crypto/rand"
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/SunnyRaj84348/do-notes/database"
 	"github.com/gin-contrib/sessions"
@@ -212,6 +214,51 @@ func main() {
 		}
 
 		// Write notes to response body
+		ctx.JSON(http.StatusOK, notes)
+	})
+
+	router.PUT("/update-note/:id", func(ctx *gin.Context) {
+		session := sessions.Default(ctx)
+
+		// Check if session doesn't exist
+		userid := session.Get("user")
+		if userid == nil {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		note := Note{}
+
+		err := ctx.BindJSON(&note)
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+
+		val := ctx.Param("id")
+
+		// Convert string to int
+		id, err := strconv.Atoi(val)
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+
+		// Update specified note
+		err = database.UpdateNotes(db, userid.(int), id, note.NoteTitle, note.NoteBody)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				ctx.AbortWithStatus(http.StatusForbidden)
+			} else {
+				ctx.AbortWithStatus(http.StatusInternalServerError)
+			}
+
+			return
+		}
+
+		notes := Notes{id, note.NoteTitle, note.NoteBody}
+
+		// Write updated note to response body
 		ctx.JSON(http.StatusOK, notes)
 	})
 

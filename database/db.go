@@ -43,3 +43,20 @@ func GetNotes(db *sql.DB, userid int) (*sql.Rows, error) {
 
 	return rows, err
 }
+
+func UpdateNotes(db *sql.DB, userid int, noteID int, noteTitle string, noteBody string) error {
+	row := db.QueryRow(`SELECT user_id FROM notes WHERE note_id = ?`, noteID)
+	var val int
+
+	err := row.Scan(&val)
+	if err == sql.ErrNoRows || userid != val {
+		return sql.ErrNoRows
+	}
+
+	_, err = db.Exec(`
+		UPDATE notes SET note_title = ?, note_body = ?
+		WHERE note_id = ? AND user_id = ?
+	`, noteTitle, noteBody, noteID, userid)
+
+	return err
+}

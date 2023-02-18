@@ -107,6 +107,22 @@ func main() {
 		}
 	})
 
+	router.POST("/logout", func(ctx *gin.Context) {
+		session := sessions.Default(ctx)
+
+		val := session.Get("user")
+		if val == nil {
+			ctx.AbortWithStatus(http.StatusBadRequest)
+		}
+
+		session.Delete("user")
+
+		err := session.Save()
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+		}
+	})
+
 	err = router.Run(":8080")
 	if err != nil {
 		log.Fatalf("Could not start the http server: %v", err)

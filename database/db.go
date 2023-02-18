@@ -26,20 +26,20 @@ func GetUser(db *sql.DB, username string) *sql.Row {
 	return row
 }
 
-func InsertNotes(db *sql.DB, username string, noteTitle string, noteBody string) error {
+func InsertNotes(db *sql.DB, userid int, noteTitle string, noteBody string) error {
 	_, err := db.Exec(`
 		INSERT INTO notes(note_title, note_body, user_id) VALUES
-		(?, ?, (SELECT user_id FROM user WHERE username = ?))
-	`, noteTitle, noteBody, username)
+		(?, ?, ?)
+	`, noteTitle, noteBody, userid)
 
 	return err
 }
 
-func GetNotes(db *sql.DB, username string) (*sql.Rows, error) {
+func GetNotes(db *sql.DB, userid int) (*sql.Rows, error) {
 	rows, err := db.Query(`
 		SELECT note_id, note_title, note_body FROM notes
-		WHERE user_id = (SELECT user_id FROM user WHERE username = ?)
-	`, username)
+		WHERE user_id = ?
+	`, userid)
 
 	return rows, err
 }

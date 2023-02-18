@@ -124,7 +124,7 @@ func main() {
 		}
 
 		// Add user to the session
-		session.Set("user", user.Username)
+		session.Set("user", user.UserID)
 
 		err = session.Save()
 		if err != nil {
@@ -156,8 +156,8 @@ func main() {
 		session := sessions.Default(ctx)
 
 		// Check if session doesn't exist
-		username := session.Get("user")
-		if username == nil {
+		userid := session.Get("user")
+		if userid == nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
@@ -171,7 +171,7 @@ func main() {
 		}
 
 		// Insert note into database
-		err = database.InsertNotes(db, username.(string), note.NoteTitle, note.NoteBody)
+		err = database.InsertNotes(db, userid.(int), note.NoteTitle, note.NoteBody)
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
@@ -182,14 +182,14 @@ func main() {
 		session := sessions.Default(ctx)
 
 		// Check if session doesn't exist
-		username := session.Get("user")
-		if username == nil {
+		userid := session.Get("user")
+		if userid == nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
 		// Retrieve notes from database
-		rows, err := database.GetNotes(db, username.(string))
+		rows, err := database.GetNotes(db, userid.(int))
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return

@@ -13,6 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Generate 64 secure random numbers
 func RandToken() []byte {
 	b := make([]byte, 64)
 
@@ -38,11 +39,13 @@ type User struct {
 func main() {
 	router := gin.Default()
 
+	// Create new cookie store with secure auth
 	store := cookie.NewStore(RandToken())
 	store.Options(sessions.Options{Secure: false})
 
 	router.Use(sessions.Sessions("session_user", store))
 
+	// Init database connection
 	db, err := database.Connect(os.Getenv("MYSQL_STR"))
 	if err != nil {
 		log.Fatal(err)
@@ -56,11 +59,13 @@ func main() {
 			return
 		}
 
+		// Hash the given password using bcrypt
 		hashPass, err := bcrypt.GenerateFromPassword([]byte(cred.Password), bcrypt.DefaultCost)
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 		}
 
+		// Finally, insert user cred to database
 		err = database.InsertUser(db, cred.Username, string(hashPass))
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusConflict, gin.H{
@@ -72,6 +77,7 @@ func main() {
 	router.POST("/login", func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
 
+		// Check for existing session
 		val := session.Get("user")
 		if val != nil {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -89,16 +95,19 @@ func main() {
 		user := User{}
 		row := database.GetUser(db, cred.Username)
 
+		// Match username with database
 		err = row.Scan(&user.UserID, &user.Username, &user.Password)
 		if err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 		}
 
+		// Check for invalid password
 		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(cred.Password))
 		if err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 		}
 
+		// Add user to the session
 		session.Set("user", user.Username)
 
 		err = session.Save()
@@ -110,6 +119,7 @@ func main() {
 	router.POST("/logout", func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
 
+		// Check if session doesn't exist
 		val := session.Get("user")
 		if val == nil {
 			ctx.AbortWithStatus(http.StatusBadRequest)

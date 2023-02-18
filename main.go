@@ -36,6 +36,11 @@ type User struct {
 	Password string
 }
 
+type Note struct {
+	NoteTitle string `json:"noteTitle" binding:"required"`
+	NoteBody  string `json:"noteBody" binding:"required"`
+}
+
 func main() {
 	router := gin.Default()
 
@@ -135,6 +140,32 @@ func main() {
 		session.Delete("user")
 
 		err := session.Save()
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	})
+
+	router.POST("/insert-note", func(ctx *gin.Context) {
+		session := sessions.Default(ctx)
+
+		// Check if session doesn't exist
+		username := session.Get("user")
+		if username == nil {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		note := Note{}
+
+		err := ctx.BindJSON(&note)
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+
+		// Insert note into database
+		err = database.InsertNotes(db, username.(string), note.NoteTitle, note.NoteBody)
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return

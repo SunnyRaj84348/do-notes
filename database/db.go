@@ -29,3 +29,12 @@ func GetUser(db *sql.DB, username string) *sql.Row {
 	row := db.QueryRow(`SELECT * FROM user WHERE username = ?`, username)
 	return row
 }
+
+func InsertNotes(db *sql.DB, username string, noteTitle string, noteBody string) error {
+	_, err := db.Exec(`
+		INSERT INTO notes(note_title, note_body, user_id) VALUES
+		(?, ?, (SELECT user_id FROM user WHERE username = ?))
+	`, noteTitle, noteBody, username)
+
+	return err
+}

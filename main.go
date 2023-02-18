@@ -114,7 +114,12 @@ func main() {
 		// Match username with database
 		err = row.Scan(&user.UserID, &user.Username, &user.Password)
 		if err != nil {
-			ctx.AbortWithStatus(http.StatusUnauthorized)
+			if err == sql.ErrNoRows {
+				ctx.AbortWithStatus(http.StatusUnauthorized)
+			} else {
+				ctx.AbortWithStatus(http.StatusInternalServerError)
+			}
+
 			return
 		}
 

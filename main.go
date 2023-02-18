@@ -178,11 +178,16 @@ func main() {
 		}
 
 		// Insert note into database
-		err = database.InsertNotes(db, userid.(int), note.NoteTitle, note.NoteBody)
+		noteID, err := database.InsertNotes(db, userid.(int), note.NoteTitle, note.NoteBody)
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
+
+		notes := Notes{noteID, note.NoteTitle, note.NoteBody}
+
+		// Write inserted note to response body
+		ctx.JSON(http.StatusOK, notes)
 	})
 
 	router.GET("/get-notes", func(ctx *gin.Context) {

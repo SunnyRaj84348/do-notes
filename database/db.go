@@ -26,13 +26,22 @@ func GetUser(db *sql.DB, username string) *sql.Row {
 	return row
 }
 
-func InsertNotes(db *sql.DB, userid int, noteTitle string, noteBody string) error {
+func InsertNotes(db *sql.DB, userid int, noteTitle string, noteBody string) (int, error) {
 	_, err := db.Exec(`
 		INSERT INTO notes(note_title, note_body, user_id) VALUES
 		(?, ?, ?)
 	`, noteTitle, noteBody, userid)
 
-	return err
+	if err != nil {
+		return -1, err
+	}
+
+	row := db.QueryRow(`SELECT LAST_INSERT_ID()`)
+
+	var noteID int
+	err = row.Scan(&noteID)
+
+	return noteID, err
 }
 
 func GetNotes(db *sql.DB, userid int) (*sql.Rows, error) {

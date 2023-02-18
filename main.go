@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/SunnyRaj84348/do-notes/database"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -57,6 +58,7 @@ func main() {
 	store.Options(sessions.Options{Secure: false})
 
 	router.Use(sessions.Sessions("session_user", store))
+	router.Use(cors.Default())
 
 	// Init database connection
 	db, err := database.Connect(os.Getenv("MYSQL_STR"))

@@ -69,3 +69,16 @@ func UpdateNotes(db *sql.DB, userid int, noteID int, noteTitle string, noteBody 
 
 	return err
 }
+
+func DeleteNotes(db *sql.DB, userid int, noteID int) error {
+	row := db.QueryRow(`SELECT user_id FROM notes WHERE note_id = ?`, noteID)
+	var val int
+
+	err := row.Scan(&val)
+	if err == sql.ErrNoRows || userid != val {
+		return sql.ErrNoRows
+	}
+
+	_, err = db.Exec(`DELETE FROM notes WHERE note_id = ?`, noteID)
+	return err
+}

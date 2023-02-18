@@ -272,6 +272,38 @@ func main() {
 		ctx.JSON(http.StatusOK, notes)
 	})
 
+	router.DELETE("/delete-note/:id", func(ctx *gin.Context) {
+		session := sessions.Default(ctx)
+
+		// Check if session doesn't exist
+		userid := session.Get("user")
+		if userid == nil {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		val := ctx.Param("id")
+
+		// Convert string to int
+		id, err := strconv.Atoi(val)
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+
+		// Delete specified note from database
+		err = database.DeleteNotes(db, userid.(int), id)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				ctx.AbortWithStatus(http.StatusForbidden)
+			} else {
+				ctx.AbortWithStatus(http.StatusInternalServerError)
+			}
+
+			return
+		}
+	})
+
 	err = router.Run(":8080")
 	if err != nil {
 		log.Fatalf("Could not start the http server: %v", err)

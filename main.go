@@ -63,6 +63,7 @@ func main() {
 		hashPass, err := bcrypt.GenerateFromPassword([]byte(cred.Password), bcrypt.DefaultCost)
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
 
 		// Finally, insert user cred to database
@@ -71,6 +72,7 @@ func main() {
 			ctx.AbortWithStatusJSON(http.StatusConflict, gin.H{
 				"message": "user already exist",
 			})
+			return
 		}
 	})
 
@@ -83,6 +85,7 @@ func main() {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 				"message": "user already logged in",
 			})
+			return
 		}
 
 		cred := Credential{}
@@ -99,12 +102,14 @@ func main() {
 		err = row.Scan(&user.UserID, &user.Username, &user.Password)
 		if err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 
 		// Check for invalid password
 		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(cred.Password))
 		if err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 
 		// Add user to the session
@@ -113,6 +118,7 @@ func main() {
 		err = session.Save()
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
 	})
 
@@ -123,6 +129,7 @@ func main() {
 		val := session.Get("user")
 		if val == nil {
 			ctx.AbortWithStatus(http.StatusBadRequest)
+			return
 		}
 
 		session.Delete("user")
@@ -130,6 +137,7 @@ func main() {
 		err := session.Save()
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
 	})
 

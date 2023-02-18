@@ -41,6 +41,12 @@ type Note struct {
 	NoteBody  string `json:"noteBody" binding:"required"`
 }
 
+type Notes struct {
+	NoteID    int    `json:"noteID"`
+	NoteTitle string `json:"noteTitle"`
+	NoteBody  string `json:"noteBody"`
+}
+
 func main() {
 	router := gin.Default()
 
@@ -170,6 +176,43 @@ func main() {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
+	})
+
+	router.GET("/get-notes", func(ctx *gin.Context) {
+		session := sessions.Default(ctx)
+
+		// Check if session doesn't exist
+		username := session.Get("user")
+		if username == nil {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		// Retrieve notes from database
+		rows, err := database.GetNotes(db, username.(string))
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		defer rows.Close()
+
+		notes := []Notes{}
+
+		for rows.Next() {
+			note := Notes{}
+
+			err := rows.Scan(&note.NoteID, &note.NoteTitle, &note.NoteBody)
+			if err != nil {
+				ctx.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+
+			notes = append(notes, note)
+		}
+
+		// Write notes to response body
+		ctx.JSON(http.StatusOK, notes)
 	})
 
 	err = router.Run(":8080")

@@ -34,3 +34,12 @@ func InsertNotes(db *sql.DB, username string, noteTitle string, noteBody string)
 
 	return err
 }
+
+func GetNotes(db *sql.DB, username string) (*sql.Rows, error) {
+	rows, err := db.Query(`
+		SELECT note_id, note_title, note_body FROM notes
+		WHERE user_id = (SELECT user_id FROM user WHERE username = ?)
+	`, username)
+
+	return rows, err
+}

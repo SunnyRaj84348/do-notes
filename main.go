@@ -164,16 +164,15 @@ func main() {
 			return
 		}
 
-		session.Delete("user")
+		// Delete session_user cookie
+		session.Clear()
+		session.Options(sessions.Options{MaxAge: -1})
 
 		err := session.Save()
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
-
-		// Delete session_user cookie
-		ctx.SetCookie("session_user", "", -1, "", "", false, true)
 	})
 
 	router.POST("/insert-note", func(ctx *gin.Context) {

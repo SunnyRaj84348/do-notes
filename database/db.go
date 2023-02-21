@@ -16,6 +16,32 @@ func Connect(conn string) (*sql.DB, error) {
 	return db, err
 }
 
+func Init(db *sql.DB) error {
+	_, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS user(
+			user_id INT PRIMARY KEY AUTO_INCREMENT,
+			username VARCHAR(255) UNIQUE,
+			password VARCHAR(255)
+		)
+	`)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS notes(
+			note_id INT PRIMARY KEY AUTO_INCREMENT,
+			note_title TEXT,
+			note_body TEXT,
+			user_id INT,
+			FOREIGN KEY(user_id) REFERENCES user(user_id)
+		)
+	`)
+
+	return err
+}
+
 func InsertUser(db *sql.DB, username string, password string) error {
 	_, err := db.Exec(`INSERT INTO user(username, password) VALUES(?, ?)`, username, password)
 	return err

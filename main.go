@@ -73,6 +73,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = database.Init(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	router.POST("/signup", func(ctx *gin.Context) {
 		cred := Credential{}
 

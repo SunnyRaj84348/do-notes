@@ -171,6 +171,9 @@ func main() {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
+
+		// Delete session_user cookie
+		ctx.SetCookie("session_user", "", -1, "", "", false, true)
 	})
 
 	router.POST("/insert-note", func(ctx *gin.Context) {

@@ -13,6 +13,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -60,8 +61,14 @@ func main() {
 	router.Use(sessions.Sessions("session_user", store))
 	router.Use(cors.Default())
 
+	// Load .env file vars
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Init database connection
-	db, err := database.Connect(os.Getenv("MYSQL_STR"))
+	db, err := database.Connect(os.Getenv("DB_URL"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -306,7 +313,7 @@ func main() {
 		}
 	})
 
-	err = router.Run(":8080")
+	err = router.Run(":" + os.Getenv("PORT"))
 	if err != nil {
 		log.Fatalf("Could not start the http server: %v", err)
 	}

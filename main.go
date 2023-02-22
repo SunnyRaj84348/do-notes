@@ -56,7 +56,10 @@ func main() {
 
 	// Create new cookie store with secure auth
 	store := cookie.NewStore(RandToken())
-	store.Options(sessions.Options{Secure: false})
+	store.Options(sessions.Options{
+		Secure: false,
+		MaxAge: 60 * 60 * 24 * 30,
+	})
 
 	router.Use(sessions.Sessions("session_user", store))
 	router.Use(cors.Default())

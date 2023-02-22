@@ -61,8 +61,14 @@ func main() {
 		MaxAge: 60 * 60 * 24 * 30,
 	})
 
+	// Cors config
+	config := cors.DefaultConfig()
+	config.AllowCredentials = true
+	config.AllowOrigins = []string{"*"}
+
+	// Use middleware
 	router.Use(sessions.Sessions("session_user", store))
-	router.Use(cors.Default())
+	router.Use(cors.New(config))
 
 	// Load .env file vars
 	err := godotenv.Load()

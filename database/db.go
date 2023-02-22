@@ -20,8 +20,8 @@ func Init(db *sql.DB) error {
 	_, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS user(
 			user_id INT PRIMARY KEY AUTO_INCREMENT,
-			username VARCHAR(255) UNIQUE,
-			password VARCHAR(255)
+			username VARCHAR(255) UNIQUE NOT NULL,
+			password VARCHAR(255) NOT NULL
 		)
 	`)
 
@@ -32,9 +32,9 @@ func Init(db *sql.DB) error {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS notes(
 			note_id INT PRIMARY KEY AUTO_INCREMENT,
-			note_title TEXT,
+			note_title TEXT NOT NULL,
 			note_body TEXT,
-			user_id INT,
+			user_id INT NOT NULL,
 			FOREIGN KEY(user_id) REFERENCES user(user_id)
 		)
 	`)

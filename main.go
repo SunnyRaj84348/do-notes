@@ -189,7 +189,6 @@ func main() {
 
 		err := ctx.BindJSON(&note)
 		if err != nil {
-			ctx.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
 
@@ -257,7 +256,6 @@ func main() {
 
 		err := ctx.BindJSON(&note)
 		if err != nil {
-			ctx.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
 

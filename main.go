@@ -42,7 +42,7 @@ type User struct {
 
 type Note struct {
 	NoteTitle string `json:"noteTitle" binding:"required"`
-	NoteBody  string `json:"noteBody" binding:"required"`
+	NoteBody  string `json:"noteBody"`
 }
 
 type Notes struct {

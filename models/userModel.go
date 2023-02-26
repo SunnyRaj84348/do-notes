@@ -1,28 +1,26 @@
 package models
 
-import (
-	"database/sql"
-
-	"github.com/SunnyRaj84348/do-notes/initializers"
-)
-
 type Credential struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
 type User struct {
-	UserID   int
-	Username string
-	Password string
+	UserID   uint32 `gorm:"primaryKey"`
+	Username string `gorm:"unique;not null"`
+	Password string `gorm:"not null"`
 }
 
 func InsertUser(username string, password string) error {
-	_, err := initializers.GetDB().Exec(`INSERT INTO user(username, password) VALUES(?, ?)`, username, password)
-	return err
+	user := User{Username: username, Password: password}
+	tx := db.Create(&user)
+
+	return tx.Error
 }
 
-func GetUser(username string) *sql.Row {
-	row := initializers.GetDB().QueryRow(`SELECT * FROM user WHERE username = ?`, username)
-	return row
+func GetUser(username string) (User, error) {
+	user := User{}
+	tx := db.First(&user, "username = ?", username)
+
+	return user, tx.Error
 }

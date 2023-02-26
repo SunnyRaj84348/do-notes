@@ -5,9 +5,10 @@ import (
 	"os"
 
 	"github.com/SunnyRaj84348/do-notes/controllers"
-	"github.com/SunnyRaj84348/do-notes/initializers"
 	"github.com/SunnyRaj84348/do-notes/middlewares"
+	"github.com/SunnyRaj84348/do-notes/models"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -18,19 +19,19 @@ func main() {
 	router.Use(middlewares.Cors())
 
 	// Load .env file vars
-	err := initializers.LoadEnvVars()
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Init database connection
-	err = initializers.ConnectToDB()
+	err = models.ConnectToDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Init database tables
-	err = initializers.InitDB()
+	err = models.InitDB()
 	if err != nil {
 		log.Fatal(err)
 	}

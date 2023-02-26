@@ -1,75 +1,55 @@
 package models
 
-import (
-	"database/sql"
-
-	"github.com/SunnyRaj84348/do-notes/initializers"
-)
-
 type Note struct {
 	NoteTitle string `json:"noteTitle" binding:"required"`
 	NoteBody  string `json:"noteBody"`
 }
 
 type Notes struct {
-	NoteID    int    `json:"noteID"`
-	NoteTitle string `json:"noteTitle"`
+	NoteID    uint32 `gorm:"primaryKey" json:"noteID"`
+	NoteTitle string `gorm:"not null" json:"noteTitle"`
 	NoteBody  string `json:"noteBody"`
+	UserID    uint32 `gorm:"not null" json:"-"`
+	User      User   `json:"-"`
 }
 
-func InsertNotes(userid int, noteTitle string, noteBody string) (int, error) {
-	_, err := initializers.GetDB().Exec(`
-		INSERT INTO notes(note_title, note_body, user_id) VALUES
-		(?, ?, ?)
-	`, noteTitle, noteBody, userid)
+func InsertNotes(userid uint32, noteTitle string, noteBody string) (Notes, error) {
+	notes := Notes{NoteTitle: noteTitle, NoteBody: noteBody, UserID: userid}
+	tx := db.Create(&notes)
 
-	if err != nil {
-		return -1, err
+	return notes, tx.Error
+}
+
+func GetNotes(userid uint32) ([]Notes, error) {
+	notes := []Notes{}
+	tx := db.Find(&notes, "user_id = ?", userid)
+
+	return notes, tx.Error
+}
+
+func UpdateNotes(userid uint32, noteID uint32, noteTitle string, noteBody string) (Notes, error) {
+	notes := Notes{NoteID: noteID}
+
+	tx := db.First(&notes, "user_id = ?", userid)
+	if tx.Error != nil {
+		return notes, tx.Error
 	}
 
-	row := initializers.GetDB().QueryRow(`SELECT LAST_INSERT_ID()`)
+	notes.NoteTitle = noteTitle
+	notes.NoteBody = noteBody
 
-	var noteID int
-	err = row.Scan(&noteID)
-
-	return noteID, err
+	tx = db.Save(&notes)
+	return notes, tx.Error
 }
 
-func GetNotes(userid int) (*sql.Rows, error) {
-	rows, err := initializers.GetDB().Query(`
-		SELECT note_id, note_title, note_body FROM notes
-		WHERE user_id = ?
-	`, userid)
+func DeleteNotes(userid uint32, noteID uint32) error {
+	notes := Notes{NoteID: noteID}
 
-	return rows, err
-}
-
-func UpdateNotes(userid int, noteID int, noteTitle string, noteBody string) error {
-	row := initializers.GetDB().QueryRow(`SELECT user_id FROM notes WHERE note_id = ?`, noteID)
-	var val int
-
-	err := row.Scan(&val)
-	if err == sql.ErrNoRows || userid != val {
-		return sql.ErrNoRows
+	tx := db.First(&notes, "user_id = ?", userid)
+	if tx.Error != nil {
+		return tx.Error
 	}
 
-	_, err = initializers.GetDB().Exec(`
-		UPDATE notes SET note_title = ?, note_body = ?
-		WHERE note_id = ? AND user_id = ?
-	`, noteTitle, noteBody, noteID, userid)
-
-	return err
-}
-
-func DeleteNotes(userid int, noteID int) error {
-	row := initializers.GetDB().QueryRow(`SELECT user_id FROM notes WHERE note_id = ?`, noteID)
-	var val int
-
-	err := row.Scan(&val)
-	if err == sql.ErrNoRows || userid != val {
-		return sql.ErrNoRows
-	}
-
-	_, err = initializers.GetDB().Exec(`DELETE FROM notes WHERE note_id = ?`, noteID)
-	return err
+	tx = db.Delete(&notes)
+	return tx.Error
 }

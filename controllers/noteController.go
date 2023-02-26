@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"database/sql"
 	"net/http"
 	"strconv"
 
 	"github.com/SunnyRaj84348/do-notes/models"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func InsertNote(ctx *gin.Context) {
@@ -19,16 +19,10 @@ func InsertNote(ctx *gin.Context) {
 	}
 
 	// Insert note into database
-	noteID, err := models.InsertNotes(userid.(int), note.NoteTitle, note.NoteBody)
+	notes, err := models.InsertNotes(userid.(uint32), note.NoteTitle, note.NoteBody)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
-	}
-
-	notes := models.Notes{
-		NoteID:    noteID,
-		NoteTitle: note.NoteTitle,
-		NoteBody:  note.NoteBody,
 	}
 
 	// Write inserted note to response body
@@ -39,26 +33,10 @@ func GetNotes(ctx *gin.Context) {
 	userid, _ := ctx.Get("userid")
 
 	// Retrieve notes from database
-	rows, err := models.GetNotes(userid.(int))
+	notes, err := models.GetNotes(userid.(uint32))
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
-	}
-
-	defer rows.Close()
-
-	notes := []models.Notes{}
-
-	for rows.Next() {
-		note := models.Notes{}
-
-		err := rows.Scan(&note.NoteID, &note.NoteTitle, &note.NoteBody)
-		if err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-
-		notes = append(notes, note)
 	}
 
 	// Write notes to response body
@@ -84,21 +62,15 @@ func UpdateNote(ctx *gin.Context) {
 	}
 
 	// Update specified note
-	err = models.UpdateNotes(userid.(int), id, note.NoteTitle, note.NoteBody)
+	notes, err := models.UpdateNotes(userid.(uint32), uint32(id), note.NoteTitle, note.NoteBody)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == gorm.ErrRecordNotFound {
 			ctx.AbortWithStatus(http.StatusForbidden)
 		} else {
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 		}
 
 		return
-	}
-
-	notes := models.Notes{
-		NoteID:    id,
-		NoteTitle: note.NoteTitle,
-		NoteBody:  note.NoteBody,
 	}
 
 	// Write updated note to response body
@@ -117,14 +89,12 @@ func DeleteNote(ctx *gin.Context) {
 	}
 
 	// Delete specified note from database
-	err = models.DeleteNotes(userid.(int), id)
+	err = models.DeleteNotes(userid.(uint32), uint32(id))
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == gorm.ErrRecordNotFound {
 			ctx.AbortWithStatus(http.StatusForbidden)
 		} else {
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 		}
-
-		return
 	}
 }

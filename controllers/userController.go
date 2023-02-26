@@ -1,13 +1,13 @@
 package controllers
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/SunnyRaj84348/do-notes/models"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 func Signup(ctx *gin.Context) {
@@ -31,7 +31,6 @@ func Signup(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusConflict, gin.H{
 			"message": "user already exist",
 		})
-		return
 	}
 }
 
@@ -43,13 +42,10 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	user := models.User{}
-	row := models.GetUser(cred.Username)
+	user, err := models.GetUser(cred.Username)
 
-	// Match username with database
-	err = row.Scan(&user.UserID, &user.Username, &user.Password)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == gorm.ErrRecordNotFound {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 		} else {
 			ctx.AbortWithStatus(http.StatusInternalServerError)
@@ -73,7 +69,6 @@ func Login(ctx *gin.Context) {
 	err = session.Save()
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
 	}
 }
 
@@ -87,6 +82,5 @@ func Logout(ctx *gin.Context) {
 	err := session.Save()
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
 	}
 }

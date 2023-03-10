@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"net/http"
+	"os"
 
-	"github.com/SunnyRaj84348/do-notes/utilities"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -11,7 +11,7 @@ import (
 
 func Sessions() gin.HandlerFunc {
 	// Create new cookie store with secure auth
-	store := cookie.NewStore(utilities.RandToken())
+	store := cookie.NewStore([]byte(os.Getenv("AUTH_KEY")))
 	store.Options(sessions.Options{
 		MaxAge:   60 * 60 * 24 * 30,
 		Secure:   true,

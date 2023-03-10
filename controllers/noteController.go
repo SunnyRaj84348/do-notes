@@ -39,8 +39,8 @@ func GetNotes(ctx *gin.Context) {
 		return
 	}
 
-	// Write notes to response body
-	ctx.JSON(http.StatusOK, notes)
+	// Render index html
+	ctx.HTML(http.StatusOK, "index.html", notes)
 }
 
 func UpdateNote(ctx *gin.Context) {

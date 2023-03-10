@@ -36,17 +36,21 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Load html template files
+	router.LoadHTMLGlob("templates/*")
+
 	auth := router.Group("/", middlewares.Auth)
 	{
+		auth.GET("/", controllers.GetNotes)
 		auth.POST("/logout", controllers.Logout)
 		auth.POST("/insert-note", controllers.InsertNote)
-		auth.GET("/get-notes", controllers.GetNotes)
 		auth.PUT("/update-note/:id", controllers.UpdateNote)
 		auth.DELETE("/delete-note/:id", controllers.DeleteNote)
 	}
 
+	router.GET("/login", controllers.Login)
+	router.POST("/session", controllers.Session)
 	router.POST("/signup", controllers.Signup)
-	router.POST("/login", controllers.Login)
 
 	err = router.Run(":" + os.Getenv("PORT"))
 	if err != nil {

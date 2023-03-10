@@ -13,7 +13,8 @@ func Auth(ctx *gin.Context) {
 	// Check if session doesn't exist
 	userid := session.Get("user")
 	if userid == nil {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
+		ctx.Redirect(http.StatusFound, "/login")
+		ctx.Abort()
 		return
 	}
 

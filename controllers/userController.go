@@ -34,10 +34,10 @@ func Signup(ctx *gin.Context) {
 	}
 }
 
-func Login(ctx *gin.Context) {
+func Session(ctx *gin.Context) {
 	cred := models.Credential{}
 
-	err := ctx.BindJSON(&cred)
+	err := ctx.Bind(&cred)
 	if err != nil {
 		return
 	}
@@ -70,6 +70,21 @@ func Login(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 	}
+
+	// Redirect to homepage
+	ctx.Redirect(http.StatusFound, "/")
+}
+
+func Login(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+
+	userid := session.Get("user")
+	if userid != nil {
+		ctx.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	ctx.HTML(http.StatusOK, "login.html", nil)
 }
 
 func Logout(ctx *gin.Context) {

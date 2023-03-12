@@ -6,7 +6,7 @@ type Credential struct {
 }
 
 type User struct {
-	UserID   uint32 `gorm:"primaryKey"`
+	UserID   string `gorm:"primaryKey; type:uuid; default:gen_random_uuid()"`
 	Username string `gorm:"unique;not null"`
 	Password string `gorm:"not null"`
 }

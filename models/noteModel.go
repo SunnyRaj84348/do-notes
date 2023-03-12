@@ -1,16 +1,25 @@
 package models
 
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
 type Note struct {
 	NoteTitle string `json:"noteTitle" binding:"required"`
 	NoteBody  string `json:"noteBody"`
 }
 
 type Notes struct {
-	NoteID    string `gorm:"primaryKey; type:uuid; default:gen_random_uuid()" json:"noteID"`
-	NoteTitle string `gorm:"not null" json:"noteTitle"`
-	NoteBody  string `json:"noteBody"`
-	UserID    string `gorm:"not null" json:"-"`
-	User      User   `json:"-"`
+	NoteID    string         `gorm:"primaryKey; type:uuid; default:gen_random_uuid()" json:"noteID"`
+	NoteTitle string         `gorm:"not null" json:"noteTitle"`
+	NoteBody  string         `json:"noteBody"`
+	UserID    string         `gorm:"not null" json:"-"`
+	User      User           `json:"-"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 func InsertNotes(userid string, noteTitle string, noteBody string) (Notes, error) {

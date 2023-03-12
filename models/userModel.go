@@ -1,14 +1,17 @@
 package models
 
+import "time"
+
 type Credential struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
 type User struct {
-	UserID   string `gorm:"primaryKey; type:uuid; default:gen_random_uuid()"`
-	Username string `gorm:"unique;not null"`
-	Password string `gorm:"not null"`
+	UserID    string `gorm:"primaryKey; type:uuid; default:gen_random_uuid()"`
+	Username  string `gorm:"unique;not null"`
+	Password  string `gorm:"not null"`
+	CreatedAt time.Time
 }
 
 func InsertUser(username string, password string) error {

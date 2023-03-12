@@ -1,20 +1,21 @@
 package models
 
 import (
+	"html/template"
 	"time"
 
 	"gorm.io/gorm"
 )
 
 type Note struct {
-	NoteTitle string `json:"noteTitle" binding:"required"`
-	NoteBody  string `json:"noteBody"`
+	NoteTitle string        `json:"noteTitle" binding:"required"`
+	NoteBody  template.HTML `json:"noteBody"`
 }
 
 type Notes struct {
 	NoteID    string         `gorm:"primaryKey; type:uuid; default:gen_random_uuid()" json:"noteID"`
 	NoteTitle string         `gorm:"not null" json:"noteTitle"`
-	NoteBody  string         `json:"noteBody"`
+	NoteBody  template.HTML  `json:"noteBody"`
 	UserID    string         `gorm:"not null" json:"-"`
 	User      User           `json:"-"`
 	CreatedAt time.Time      `json:"createdAt"`
@@ -22,7 +23,7 @@ type Notes struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
-func InsertNotes(userid string, noteTitle string, noteBody string) (Notes, error) {
+func InsertNotes(userid string, noteTitle string, noteBody template.HTML) (Notes, error) {
 	notes := Notes{NoteTitle: noteTitle, NoteBody: noteBody, UserID: userid}
 	tx := db.Create(&notes)
 
@@ -36,7 +37,7 @@ func GetNotes(userid string) ([]Notes, error) {
 	return notes, tx.Error
 }
 
-func UpdateNotes(userid string, noteID string, noteTitle string, noteBody string) (Notes, error) {
+func UpdateNotes(userid string, noteID string, noteTitle string, noteBody template.HTML) (Notes, error) {
 	notes := Notes{NoteID: noteID}
 
 	tx := db.First(&notes, "user_id = ?", userid)

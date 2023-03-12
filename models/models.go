@@ -3,7 +3,7 @@ package models
 import (
 	"os"
 
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
@@ -13,7 +13,7 @@ var db *gorm.DB
 func ConnectToDB() error {
 	var err error
 
-	db, err = gorm.Open(mysql.Open(os.Getenv("DB_URL")), &gorm.Config{
+	db, err = gorm.Open(postgres.Open(os.Getenv("DB_URL")), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},

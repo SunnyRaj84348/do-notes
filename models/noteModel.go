@@ -6,28 +6,28 @@ type Note struct {
 }
 
 type Notes struct {
-	NoteID    uint32 `gorm:"primaryKey" json:"noteID"`
+	NoteID    string `gorm:"primaryKey; type:uuid; default:gen_random_uuid()" json:"noteID"`
 	NoteTitle string `gorm:"not null" json:"noteTitle"`
 	NoteBody  string `json:"noteBody"`
-	UserID    uint32 `gorm:"not null" json:"-"`
+	UserID    string `gorm:"not null" json:"-"`
 	User      User   `json:"-"`
 }
 
-func InsertNotes(userid uint32, noteTitle string, noteBody string) (Notes, error) {
+func InsertNotes(userid string, noteTitle string, noteBody string) (Notes, error) {
 	notes := Notes{NoteTitle: noteTitle, NoteBody: noteBody, UserID: userid}
 	tx := db.Create(&notes)
 
 	return notes, tx.Error
 }
 
-func GetNotes(userid uint32) ([]Notes, error) {
+func GetNotes(userid string) ([]Notes, error) {
 	notes := []Notes{}
 	tx := db.Find(&notes, "user_id = ?", userid)
 
 	return notes, tx.Error
 }
 
-func UpdateNotes(userid uint32, noteID uint32, noteTitle string, noteBody string) (Notes, error) {
+func UpdateNotes(userid string, noteID string, noteTitle string, noteBody string) (Notes, error) {
 	notes := Notes{NoteID: noteID}
 
 	tx := db.First(&notes, "user_id = ?", userid)
@@ -42,7 +42,7 @@ func UpdateNotes(userid uint32, noteID uint32, noteTitle string, noteBody string
 	return notes, tx.Error
 }
 
-func DeleteNotes(userid uint32, noteID uint32) error {
+func DeleteNotes(userid string, noteID string) error {
 	notes := Notes{NoteID: noteID}
 
 	tx := db.First(&notes, "user_id = ?", userid)

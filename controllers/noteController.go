@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/SunnyRaj84348/do-notes/models"
 	"github.com/gin-gonic/gin"
@@ -19,7 +18,7 @@ func InsertNote(ctx *gin.Context) {
 	}
 
 	// Insert note into database
-	notes, err := models.InsertNotes(userid.(uint32), note.NoteTitle, note.NoteBody)
+	notes, err := models.InsertNotes(userid.(string), note.NoteTitle, note.NoteBody)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -33,7 +32,7 @@ func GetNotes(ctx *gin.Context) {
 	userid, _ := ctx.Get("userid")
 
 	// Retrieve notes from database
-	notes, err := models.GetNotes(userid.(uint32))
+	notes, err := models.GetNotes(userid.(string))
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -52,17 +51,10 @@ func UpdateNote(ctx *gin.Context) {
 		return
 	}
 
-	val := ctx.Param("id")
-
-	// Convert string to int
-	id, err := strconv.Atoi(val)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+	id := ctx.Param("id")
 
 	// Update specified note
-	notes, err := models.UpdateNotes(userid.(uint32), uint32(id), note.NoteTitle, note.NoteBody)
+	notes, err := models.UpdateNotes(userid.(string), id, note.NoteTitle, note.NoteBody)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			ctx.AbortWithStatus(http.StatusForbidden)
@@ -79,17 +71,10 @@ func UpdateNote(ctx *gin.Context) {
 
 func DeleteNote(ctx *gin.Context) {
 	userid, _ := ctx.Get("userid")
-	val := ctx.Param("id")
-
-	// Convert string to int
-	id, err := strconv.Atoi(val)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+	id := ctx.Param("id")
 
 	// Delete specified note from database
-	err = models.DeleteNotes(userid.(uint32), uint32(id))
+	err := models.DeleteNotes(userid.(string), id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			ctx.AbortWithStatus(http.StatusForbidden)

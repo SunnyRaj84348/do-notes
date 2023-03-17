@@ -14,7 +14,7 @@ func Sessions() gin.HandlerFunc {
 	store := cookie.NewStore([]byte(os.Getenv("AUTH_KEY")))
 	store.Options(sessions.Options{
 		MaxAge:   60 * 60 * 24 * 30,
-		Secure:   true,
+		Secure:   false,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})

@@ -8,8 +8,8 @@ import (
 )
 
 type Note struct {
-	NoteTitle string        `json:"noteTitle" binding:"required"`
-	NoteBody  template.HTML `json:"noteBody"`
+	NoteTitle string        `form:"noteTitle" binding:"required"`
+	NoteBody  template.HTML `form:"noteBody"`
 }
 
 type Notes struct {

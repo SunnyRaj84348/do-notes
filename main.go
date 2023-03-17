@@ -38,6 +38,7 @@ func main() {
 
 	// Load html template files
 	router.LoadHTMLGlob("templates/*")
+	router.Static("/assets", "./assets")
 
 	auth := router.Group("/", middlewares.Auth)
 	{

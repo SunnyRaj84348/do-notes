@@ -6,10 +6,47 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>do-notes</title>
+    <link rel="stylesheet" href="/assets/css/index.css">
+    <script src="/assets/js/index.js" defer></script>
 </head>
 
 <body>
+    <nav>
+        <img src="/assets/res/logo.svg" alt="do-notes">
+        <form action="">
+            <div class="search">
+                <img src="/assets/res/search.svg" alt="">
+                <input type="text" name="" id="" placeholder="Search Here...">
+            </div>
+        </form>
+    </nav>
 
+    <div class="notes-cont">
+        {{range $note := .}}
+        <div class="note" data-id="{{$note.NoteID}}">
+            <div class="title">{{$note.NoteTitle}}</div>
+            <div id="body">{{$note.NoteBody}}</div>
+        </div>
+        {{end}}
+    </div>
+
+    <div class="plus">
+        <img src="/assets/res/plus.svg" alt="">
+    </div>
+
+    <div class="insert-box hidden">
+        <form action="/insert-note" method="post">
+            <input type="text" name="noteTitle" id="">
+            <textarea name="noteBody" id="" class="notebody"></textarea>
+            <input type="submit" value="Save">
+        </form>
+    </div>
+
+    <!-- <div>
+        {{range .}}
+        <div contenteditable="true">{{.NoteBody}}</div>
+        {{end}}
+    </div> -->
 </body>
 
 </html>

@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"html/template"
 	"net/http"
+	"strings"
 
 	"github.com/SunnyRaj84348/do-notes/models"
 	"github.com/gin-gonic/gin"
@@ -12,20 +14,21 @@ func InsertNote(ctx *gin.Context) {
 	userid, _ := ctx.Get("userid")
 	note := models.Note{}
 
-	err := ctx.BindJSON(&note)
+	err := ctx.Bind(&note)
 	if err != nil {
 		return
 	}
 
 	// Insert note into database
-	notes, err := models.InsertNotes(userid.(string), note.NoteTitle, note.NoteBody)
+	_, err = models.InsertNotes(userid.(string), note.NoteTitle, note.NoteBody)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	// Write inserted note to response body
-	ctx.JSON(http.StatusOK, notes)
+	//ctx.JSON(http.StatusOK, notes)
+	ctx.Redirect(http.StatusFound, "/")
 }
 
 func GetNotes(ctx *gin.Context) {
@@ -36,6 +39,13 @@ func GetNotes(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
+	}
+
+	for i := 0; i < len(notes); i++ {
+		str := string(notes[i].NoteBody)
+		str = strings.Replace(str, "\n", "<br />", -1)
+
+		notes[i].NoteBody = template.HTML(str)
 	}
 
 	// Render index html

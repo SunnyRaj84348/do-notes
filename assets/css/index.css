@@ -1,0 +1,102 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
+}
+
+nav > img {
+    width: 18rem;
+}
+
+.search {
+    border: 1px solid gray;
+    border-radius: 50px;
+    display: flex;
+    gap: 12px;
+    padding: 0.7rem;
+    width: 30vw;
+}
+
+.search img {
+    margin-left: 1.5rem;
+    width: 1.6rem;
+}
+
+.search input {
+    border: none;
+    width: 100%;
+}
+
+.search input:focus {
+    outline: none;
+}
+
+.notes-cont {
+    padding: 3rem 5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    align-items: start;
+    gap: 3rem;
+}
+
+.note {
+    border: 1px solid gray;
+    border-radius: 25px;
+    outline: none;
+    padding: 2rem 2rem 4rem 2rem;
+}
+
+.note .title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.note #body {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    overflow-wrap: break-word;
+    /* height: 15rem;
+    overflow: hidden; */
+}
+
+.plus {
+    position: fixed;
+    right: 2rem;
+    bottom: 2rem;
+}
+
+.insert-box form {
+    display: flex;
+    flex-direction: column;
+}
+
+.insert-box {
+    width: 35vw;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.insert-box form textarea {
+    resize: none;
+    height: 25rem;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.hidden {
+    display: none;
+}

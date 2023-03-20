@@ -47,6 +47,7 @@ func main() {
 
 	router.POST("/signup", controllers.Signup)
 	router.POST("/login", controllers.Login)
+	router.POST("/verify-email", controllers.VerifyEmail)
 
 	err = router.Run(":" + os.Getenv("PORT"))
 	if err != nil {

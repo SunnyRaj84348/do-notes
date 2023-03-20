@@ -3,7 +3,9 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/SunnyRaj84348/do-notes/mailjet"
 	"github.com/SunnyRaj84348/do-notes/models"
+	"github.com/SunnyRaj84348/do-notes/utilities"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -11,26 +13,47 @@ import (
 )
 
 func Signup(ctx *gin.Context) {
-	cred := models.Credential{}
+	user := models.User{}
 
-	err := ctx.BindJSON(&cred)
+	err := ctx.BindJSON(&user)
 	if err != nil {
 		return
 	}
 
 	// Hash the given password using bcrypt
-	hashPass, err := bcrypt.GenerateFromPassword([]byte(cred.Password), bcrypt.DefaultCost)
+	hashPass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
+	user.Password = string(hashPass)
+
 	// Insert user cred to database
-	err = models.InsertUser(cred.Username, string(hashPass))
+	err = models.InsertUser(user)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusConflict, gin.H{
 			"message": "user already exist",
 		})
+		return
+	}
+
+	code, err := utilities.GenVerificationCode()
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	err = mailjet.SendVerification(user.Email, code)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	err = models.InsertEmailAuth(user.Email, code)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
 }
 
@@ -61,6 +84,14 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
+	// Check if email is not verified
+	if !user.Verified {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"message": "email has not been verified",
+		})
+		return
+	}
+
 	session := sessions.Default(ctx)
 
 	// Add user to the session
@@ -82,5 +113,32 @@ func Logout(ctx *gin.Context) {
 	err := session.Save()
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
+	}
+}
+
+func VerifyEmail(ctx *gin.Context) {
+	emailAuth := models.EmailAuth{}
+
+	err := ctx.BindJSON(&emailAuth)
+	if err != nil {
+		return
+	}
+
+	err = models.GetEmailAuth(emailAuth)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	err = models.DeleteEmailAuth(emailAuth)
+	if err != nil {
+		ctx.Copy().AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	err = models.SetUserVerified(emailAuth.Email)
+	if err != nil {
+		ctx.Copy().AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
 }

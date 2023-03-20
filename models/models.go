@@ -23,8 +23,8 @@ func ConnectToDB() error {
 }
 
 func InitDB() error {
-	if !db.Migrator().HasTable("user") || !db.Migrator().HasTable("notes") {
-		err := db.AutoMigrate(User{}, Notes{})
+	if !db.Migrator().HasTable("user") || !db.Migrator().HasTable("notes") || !db.Migrator().HasTable("email_auth") {
+		err := db.AutoMigrate(User{}, Notes{}, EmailAuth{})
 		return err
 	}
 

@@ -20,6 +20,12 @@ func Signup(ctx *gin.Context) {
 		return
 	}
 
+	err = utilities.ValidateEmail(user.Email)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
 	// Hash the given password using bcrypt
 	hashPass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -121,6 +127,12 @@ func VerifyEmail(ctx *gin.Context) {
 
 	err := ctx.BindJSON(&emailAuth)
 	if err != nil {
+		return
+	}
+
+	err = utilities.ValidateEmail(emailAuth.Email)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 

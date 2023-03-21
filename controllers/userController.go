@@ -145,13 +145,13 @@ func VerifyEmail(ctx *gin.Context) {
 
 	err = models.DeleteEmailAuth(emailAuth)
 	if err != nil {
-		ctx.Copy().AbortWithError(http.StatusInternalServerError, err)
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	err = models.SetUserVerified(emailAuth.Email)
 	if err != nil {
-		ctx.Copy().AbortWithError(http.StatusInternalServerError, err)
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/SunnyRaj84348/do-notes/models"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -53,6 +54,13 @@ func UpdateNote(ctx *gin.Context) {
 
 	id := ctx.Param("id")
 
+	// Check for valid uuid syntax
+	_, err = uuid.Parse(id)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
 	// Update specified note
 	notes, err := models.UpdateNotes(userid.(string), id, note.NoteTitle, note.NoteBody)
 	if err != nil {
@@ -73,8 +81,15 @@ func DeleteNote(ctx *gin.Context) {
 	userid, _ := ctx.Get("userid")
 	id := ctx.Param("id")
 
+	// Check for valid uuid syntax
+	_, err := uuid.Parse(id)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
 	// Delete specified note from database
-	err := models.DeleteNotes(userid.(string), id)
+	err = models.DeleteNotes(userid.(string), id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			ctx.AbortWithStatus(http.StatusForbidden)

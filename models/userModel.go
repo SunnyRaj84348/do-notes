@@ -14,7 +14,7 @@ type User struct {
 	Email     string `gorm:"type:citext; unique; not null" json:"email" binding:"required"`
 	Username  string `gorm:"unique; not null" json:"username" binding:"required"`
 	Password  string `gorm:"not null" json:"password" binding:"required"`
-	Verified  bool
+	Verified  bool   `gorm:"default:false"`
 	CreatedAt time.Time
 }
 
@@ -25,9 +25,7 @@ type EmailAuth struct {
 }
 
 func InsertUser(user User) error {
-	user.Verified = false
 	tx := db.Create(&user)
-
 	return tx.Error
 }
 

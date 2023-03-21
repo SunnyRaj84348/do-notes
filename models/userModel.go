@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Credential struct {
 	Username string `json:"username" binding:"required"`
@@ -17,8 +19,9 @@ type User struct {
 }
 
 type EmailAuth struct {
-	Email string `gorm:"primaryKey; type:citext" json:"email" binding:"required"`
-	Code  string `gorm:"type:char(4) not null " json:"code" binding:"required"`
+	Email     string    `gorm:"primaryKey; type:citext" json:"email" binding:"required"`
+	Code      string    `gorm:"type:char(4) not null " json:"code" binding:"required"`
+	ExpiresAt time.Time `gorm:"not null"`
 }
 
 func InsertUser(user User) error {
@@ -36,15 +39,15 @@ func GetUser(username string) (User, error) {
 }
 
 func InsertEmailAuth(email string, code string) error {
-	emailAuth := EmailAuth{email, code}
+	emailAuth := EmailAuth{email, code, time.Now().Add(10 * time.Minute)}
 	tx := db.Create(&emailAuth)
 
 	return tx.Error
 }
 
-func GetEmailAuth(emailAuth EmailAuth) error {
-	tx := db.First(&EmailAuth{}, "email = ? and code = ?", emailAuth.Email, emailAuth.Code)
-	return tx.Error
+func GetEmailAuth(emailAuth EmailAuth) (EmailAuth, error) {
+	tx := db.First(&emailAuth, "code = ?", emailAuth.Code)
+	return emailAuth, tx.Error
 }
 
 func DeleteEmailAuth(emailAuth EmailAuth) error {

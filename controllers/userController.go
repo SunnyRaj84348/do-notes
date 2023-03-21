@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/SunnyRaj84348/do-notes/mailjet"
 	"github.com/SunnyRaj84348/do-notes/models"
@@ -136,8 +137,8 @@ func VerifyEmail(ctx *gin.Context) {
 		return
 	}
 
-	err = models.GetEmailAuth(emailAuth)
-	if err != nil {
+	emailAuth, err = models.GetEmailAuth(emailAuth)
+	if err != nil || time.Now().Compare(emailAuth.ExpiresAt) != -1 {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
